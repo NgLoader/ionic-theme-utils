@@ -21,20 +21,26 @@ try {
   const manifest = JSON.parse(readFileSync(join(directory, 'package.json'), 'utf8'));
   assert.equal(manifest.type, 'module');
 
-  // Check lazy imports as well as the graph reached by importing the public APIs.
-  for (const relative of readdirSync(join(directory, 'dist'), { recursive: true }).filter((file) => file.endsWith('.js'))) {
+  // Check declarations and lazy imports as well as the public JavaScript graph.
+  for (const relative of readdirSync(join(directory, 'dist'), { recursive: true }).filter(
+    (file) => file.endsWith('.js') || file.endsWith('.d.ts'),
+  )) {
     const file = join(directory, 'dist', relative);
-    const source = ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.JS);
+    const declaration = relative.endsWith('.d.ts');
+    const source = ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.Latest, true);
     const visit = (node) => {
       const specifier =
         ts.isImportDeclaration(node) || ts.isExportDeclaration(node)
           ? node.moduleSpecifier
           : ts.isCallExpression(node) && node.expression.kind === ts.SyntaxKind.ImportKeyword
             ? node.arguments[0]
-            : undefined;
+            : ts.isImportTypeNode(node) && ts.isLiteralTypeNode(node.argument)
+              ? node.argument.literal
+              : undefined;
       if (specifier && ts.isStringLiteral(specifier) && specifier.text.startsWith('.')) {
         assert.ok(specifier.text.endsWith('.js'), `${relative}: missing .js extension in ${specifier.text}`);
-        assert.ok(statSync(resolve(dirname(file), specifier.text)).isFile(), `${relative}: invalid target ${specifier.text}`);
+        const target = declaration ? specifier.text.replace(/\.js$/, '.d.ts') : specifier.text;
+        assert.ok(statSync(resolve(dirname(file), target)).isFile(), `${relative}: invalid target ${specifier.text}`);
       }
       ts.forEachChild(node, visit);
     };

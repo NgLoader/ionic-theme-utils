@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
@@ -19,6 +19,7 @@ const [archive] = JSON.parse(
 execFileSync('tar', ['-xzf', join(temporary, archive.filename), '-C', temporary]);
 const manifest = JSON.parse(readFileSync(join(temporary, 'package/package.json'), 'utf8'));
 const cli = join(temporary, 'package', manifest.bin['rdlabo-check-esm']);
+const buildCli = join(temporary, 'package', manifest.bin['rdlabo-build-theme']);
 
 const fixture = (name, { type = 'module', lazy = './detail.js', native = 'export const native = true;', files = ['dist'] } = {}) => {
   const directory = join(temporary, name);
@@ -85,4 +86,58 @@ test('imports subpath entry points and catches import-time DOM access', () => {
   const result = run(fixture('dom-access', { native: 'export const body = document.body;' }));
   assert.notEqual(result.status, 0);
   assert.match(result.output, /document is not defined/);
+});
+
+test('rejects extensionless references in declarations', () => {
+  const directory = fixture('declaration');
+  writeFileSync(join(directory, 'dist/index.d.ts'), "export type Value = import('./detail').Value;");
+  const result = run(directory);
+  assert.notEqual(result.status, 0);
+  assert.match(result.output, /index\.d\.ts: missing \.js extension/);
+});
+
+test('builds extensionless sources and declarations with the packed shared CLI', () => {
+  const directory = fixture('build');
+  const require = createRequire(import.meta.url);
+  symlinkSync(dirname(require.resolve('tsdown/package.json')), join(directory, 'node_modules/tsdown'), 'dir');
+  mkdirSync(join(directory, 'src/nested'), { recursive: true });
+  mkdirSync(join(directory, 'dist/css'), { recursive: true });
+  writeFileSync(join(directory, 'dist/css/theme.css'), ':root { color: red; }');
+  const source = "export { value } from './detail'; export type { Value } from './detail'; export const load = () => import('./nested');";
+  writeFileSync(join(directory, 'src/index.ts'), source);
+  writeFileSync(join(directory, 'src/detail.ts'), 'export type Value = number; export const value: Value = 42;');
+  writeFileSync(join(directory, 'src/nested/index.ts'), 'export const nested = true;');
+  writeFileSync(join(directory, 'src/native.ts'), 'export const native = true;');
+  writeFileSync(join(directory, 'src/unused.spec.ts'), 'throw new Error("Tests must not be built");');
+  writeFileSync(
+    join(directory, 'tsconfig.json'),
+    JSON.stringify({ compilerOptions: { target: 'ES2020', module: 'ESNext', moduleResolution: 'bundler', strict: true } }),
+  );
+  const result = spawnSync(process.execPath, [buildCli, directory], { cwd: temporary, encoding: 'utf8', timeout: 30000 });
+  assert.ifError(result.error);
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  assert.equal(readFileSync(join(directory, 'src/index.ts'), 'utf8'), source);
+  assert.ok(existsSync(join(directory, 'dist/css/theme.css')));
+  assert.ok(!existsSync(join(directory, 'dist/unused.spec.js')));
+  assert.match(readFileSync(join(directory, 'dist/index.d.ts'), 'utf8'), /\.\/detail\.js/);
+  const checked = run(directory);
+  assert.equal(checked.status, 0, checked.output);
+  execFileSync(
+    process.execPath,
+    [
+      '--input-type=module',
+      '-e',
+      "const m = await import('theme-build'); if (m.value !== 42 || !(await m.load()).nested) process.exit(1);",
+    ],
+    { cwd: directory },
+  );
+  writeFileSync(
+    join(directory, 'consumer.mts'),
+    "import { value, type Value } from 'theme-build'; const result: Value = value; void result;",
+  );
+  execFileSync(
+    process.execPath,
+    [require.resolve('typescript/bin/tsc'), '--noEmit', '--module', 'NodeNext', '--target', 'ES2020', 'consumer.mts'],
+    { cwd: directory },
+  );
 });
