@@ -8,7 +8,8 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "rdlabo-copy-structured-list": "./scripts/copy-structured-list.mjs"
+    "rdlabo-copy-structured-list": "./scripts/copy-structured-list.mjs",
+    "rdlabo-check-esm": "./scripts/check-esm.mjs"
   },
   "exports": {
     ".": {
@@ -25,17 +26,20 @@
     "scripts/copy-structured-list.mjs",
     "package.json",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "scripts/check-esm.mjs"
   ],
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
-    "fmt:check": "prettier --check \"./**/*.{js,json,md,scss,ts,yml}\"",
+    "fmt:check": "prettier --check \"./**/*.{js,json,md,mjs,scss,ts,yml}\"",
     "lint": "eslint .",
-    "fmt": "prettier --write \"./**/*.{js,json,md,scss,ts,yml}\"",
+    "fmt": "prettier --write \"./**/*.{js,json,md,mjs,scss,ts,yml}\"",
     "release": "np --branch main --no-tests --no-publish",
     "prepublishOnly": "npm run build",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "test:esm": "node scripts/check-esm.mjs",
+    "test:cli": "node --test scripts/check-esm.test.mjs"
   },
   "repository": {
     "type": "git",
