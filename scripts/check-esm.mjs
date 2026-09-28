@@ -37,6 +37,10 @@ try {
             : ts.isImportTypeNode(node) && ts.isLiteralTypeNode(node.argument)
               ? node.argument.literal
               : undefined;
+      // The root is Ionic lazy-loader build. Bundlers then emit every component as a chunk, and apps get a second gesture controller.
+      if (specifier && ts.isStringLiteral(specifier) && !declaration) {
+        assert.notEqual(specifier.text, '@ionic/core', `${relative}: import from @ionic/core/components instead of @ionic/core`);
+      }
       if (specifier && ts.isStringLiteral(specifier) && specifier.text.startsWith('.')) {
         assert.ok(specifier.text.endsWith('.js'), `${relative}: missing .js extension in ${specifier.text}`);
         const target = declaration ? specifier.text.replace(/\.js$/, '.d.ts') : specifier.text;

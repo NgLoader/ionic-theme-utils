@@ -1,4 +1,4 @@
-import type { AnimationBuilder, ComponentProps, ComponentRef, FrameworkDelegate, Mode, OverlayInterface } from '@ionic/core';
+import type { AnimationBuilder, ComponentProps, ComponentRef, FrameworkDelegate, Mode, OverlayInterface } from '@ionic/core/components';
 
 export interface PopoverInterface extends OverlayInterface {
   present: (event?: MouseEvent | TouchEvent | PointerEvent) => Promise<void>;

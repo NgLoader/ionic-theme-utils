@@ -1,5 +1,5 @@
-import type { Animation } from '@ionic/core';
-import { createAnimation } from '@ionic/core';
+import type { Animation } from '@ionic/core/components';
+import { createAnimation } from '@ionic/core/components';
 
 /** Options consumed by the shared iOS page transition animation. */
 export interface IosTransitionAnimationOptions {

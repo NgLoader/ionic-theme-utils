@@ -88,6 +88,12 @@ test('imports subpath entry points and catches import-time DOM access', () => {
   assert.match(result.output, /document is not defined/);
 });
 
+test('rejects runtime imports from the @ionic/core root', () => {
+  const result = run(fixture('ionic-root', { native: "export { createAnimation } from '@ionic/core';" }));
+  assert.notEqual(result.status, 0);
+  assert.match(result.output, /native\.js: import from @ionic\/core\/components instead of @ionic\/core/);
+});
+
 test('rejects extensionless references in declarations', () => {
   const directory = fixture('declaration');
   writeFileSync(join(directory, 'dist/index.d.ts'), "export type Value = import('./detail').Value;");
