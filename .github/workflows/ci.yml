@@ -24,6 +24,7 @@ jobs:
       - run: npm run fmt:check
       - run: npm run lint
       - run: npm test
+      - run: npm run test:cli
       - run: npm run build
       - name: Verify Node ESM output
-        run: node --input-type=module -e "await import('./dist/index.js')"
+        run: npm run test:esm
