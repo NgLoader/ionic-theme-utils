@@ -1,7 +1,7 @@
 {
   "name": "@rdlabo/ionic-theme-utils",
   "private": false,
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Shared utilities for Rdlabo Ionic themes",
   "type": "module",
   "main": "./dist/index.js",
