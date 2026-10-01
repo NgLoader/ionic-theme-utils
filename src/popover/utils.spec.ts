@@ -4,10 +4,31 @@ import { calculateWindowAdjustment, getIndexOfItem, getNextItem, getPopoverPosit
 
 describe('popover utilities', () => {
   it.each(['left', 'right', 'start', 'end'] as const)('preserves the vertical anchor alignment for side=%s', (side) => {
-    const position = calculateWindowAdjustment(side, 120, 100, 5, 440, 636, 200, 52, 8, 'right', 'center');
+    const position = calculateWindowAdjustment(
+      side,
+      120,
+      100,
+      5,
+      440,
+      636,
+      200,
+      52,
+      8,
+      'right',
+      'center',
+      undefined,
+      undefined,
+      false,
+      true,
+    );
     expect(position.top).toBe(120);
-    expect(calculateWindowAdjustment(side, -4, 100, 5, 440, 636, 200, 52, 8, 'right', 'center').top).toBe(5);
-    expect(calculateWindowAdjustment(side, 620, 100, 5, 440, 636, 200, 52, 8, 'right', 'center').top).toBe(579);
+    expect(calculateWindowAdjustment(side, 120, 100, 5, 440, 636, 200, 52, 8, 'right', 'center').top).toBe(128);
+    expect(
+      calculateWindowAdjustment(side, -4, 100, 5, 440, 636, 200, 52, 8, 'right', 'center', undefined, undefined, false, true).top,
+    ).toBe(5);
+    expect(
+      calculateWindowAdjustment(side, 620, 100, 5, 440, 636, 200, 52, 8, 'right', 'center', undefined, undefined, false, true).top,
+    ).toBe(579);
   });
 
   it('navigates only relative to ion-item elements', () => {
