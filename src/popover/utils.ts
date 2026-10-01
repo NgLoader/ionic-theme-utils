@@ -612,15 +612,11 @@ export const calculateWindowAdjustment = (
   triggerCoordinates?: ReferenceCoordinates,
   eventElementRect?: DOMRect,
   isReplace: boolean = false,
-  preserveHorizontalAlignment: boolean = false,
 ): PopoverStyles => {
   const triggerTop = triggerCoordinates ? triggerCoordinates.top + triggerCoordinates.height : bodyHeight / 2 - contentHeight / 2;
   const triggerHeight = triggerCoordinates ? triggerCoordinates.height : 0;
   let left = coordLeft;
-  // Projected rail controls opt in; ordinary popovers retain their existing margin.
-  const horizontal = preserveHorizontalAlignment && (side === 'left' || side === 'right' || side === 'start' || side === 'end');
-  let top = !isReplace ? coordTop + (horizontal ? 0 : POPOVER_IOS_BODY_MARGIN) : coordTop - triggerHeight;
-  if (horizontal && !isReplace) top = Math.max(bodyPadding, Math.min(top, bodyHeight - bodyPadding - contentHeight));
+  let top = !isReplace ? coordTop + POPOVER_IOS_BODY_MARGIN : coordTop - triggerHeight;
   let bottom;
   let originX = contentOriginX;
   let originY = contentOriginY;

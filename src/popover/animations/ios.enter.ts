@@ -102,7 +102,6 @@ export const iosEnterAnimation = (baseEl: HTMLElement, opts: any = {}): Animatio
     results.referenceCoordinates,
     referenceSizeEl?.getBoundingClientRect(),
     isReplace,
-    opts.preserveHorizontalAlignment === true,
   );
   // A replacing surface grows inward from the button's edge, not its center.
   const preferredLeft =
