@@ -3,6 +3,13 @@ import { describe, expect, it } from 'vitest';
 import { calculateWindowAdjustment, getIndexOfItem, getNextItem, getPopoverPosition, getPrevItem } from './utils.js';
 
 describe('popover utilities', () => {
+  it.each(['left', 'right', 'start', 'end'] as const)('preserves the vertical anchor alignment for side=%s', (side) => {
+    const position = calculateWindowAdjustment(side, 120, 100, 5, 440, 636, 200, 52, 8, 'right', 'center');
+    expect(position.top).toBe(120);
+    expect(calculateWindowAdjustment(side, -4, 100, 5, 440, 636, 200, 52, 8, 'right', 'center').top).toBe(5);
+    expect(calculateWindowAdjustment(side, 620, 100, 5, 440, 636, 200, 52, 8, 'right', 'center').top).toBe(579);
+  });
+
   it('navigates only relative to ion-item elements', () => {
     const items = [document.createElement('ion-item'), document.createElement('ion-item')] as HTMLIonItemElement[];
 
