@@ -1,4 +1,4 @@
-import { createAnimation } from '@ionic/core/components';
+import { createAnimation } from '@ionic/core/components/index.js';
 import { getElementRoot } from '../../dom.js';
 
 import type { Animation } from '@ionic/core/components';

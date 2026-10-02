@@ -1,4 +1,4 @@
-import { createAnimation } from '@ionic/core/components';
+import { createAnimation } from '@ionic/core/components/index.js';
 import type { Animation } from '@ionic/core/components';
 import { calculateWindowAdjustment, getPopoverDimensions, getPopoverPosition, POPOVER_IOS_BODY_MARGIN } from '../utils.js';
 import { createCalloutSurface } from '../callout-surface.js';

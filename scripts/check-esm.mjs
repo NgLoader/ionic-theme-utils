@@ -38,8 +38,12 @@ try {
               ? node.argument.literal
               : undefined;
       // The root is Ionic lazy-loader build. Bundlers then emit every component as a chunk, and apps get a second gesture controller.
+      // The bare components subpath is a directory import in Node, Ionic 8 has no exports map for it.
       if (specifier && ts.isStringLiteral(specifier) && !declaration) {
-        assert.notEqual(specifier.text, '@ionic/core', `${relative}: import from @ionic/core/components instead of @ionic/core`);
+        assert.ok(
+          specifier.text !== '@ionic/core' && specifier.text !== '@ionic/core/components',
+          `${relative}: import from @ionic/core/components/index.js instead of ${specifier.text}`,
+        );
       }
       if (specifier && ts.isStringLiteral(specifier) && specifier.text.startsWith('.')) {
         assert.ok(specifier.text.endsWith('.js'), `${relative}: missing .js extension in ${specifier.text}`);

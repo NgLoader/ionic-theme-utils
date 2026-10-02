@@ -91,7 +91,13 @@ test('imports subpath entry points and catches import-time DOM access', () => {
 test('rejects runtime imports from the @ionic/core root', () => {
   const result = run(fixture('ionic-root', { native: "export { createAnimation } from '@ionic/core';" }));
   assert.notEqual(result.status, 0);
-  assert.match(result.output, /native\.js: import from @ionic\/core\/components instead of @ionic\/core/);
+  assert.match(result.output, /native\.js: import from @ionic\/core\/components\/index\.js instead of @ionic\/core\n/);
+});
+
+test('rejects runtime imports from the bare @ionic/core/components subpath', () => {
+  const result = run(fixture('ionic-components-dir', { native: "export { createAnimation } from '@ionic/core/components';" }));
+  assert.notEqual(result.status, 0);
+  assert.match(result.output, /native\.js: import from @ionic\/core\/components\/index\.js instead of @ionic\/core\/components\n/);
 });
 
 test('rejects extensionless references in declarations', () => {
